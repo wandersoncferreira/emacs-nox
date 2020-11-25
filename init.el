@@ -34,6 +34,11 @@
 (use-package diminish
   :ensure t)
 
+(use-package monokai-theme
+  :ensure t
+  :config
+  (load-theme 'monokai t))
+
 (use-package clojure-mode
   :ensure t
   :config
@@ -63,6 +68,23 @@
   :diminish eldoc-mode
   :config
   (global-eldoc-mode +1))
+
+;;; haskell
+(use-package haskell-mode
+  :ensure t
+  :config
+  (define-key haskell-mode-map [f8] 'haskell-navigate-imports)
+  (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+  (add-hook 'haskell-mode-hook 'haskell-doc-mode))
+
+(use-package lsp-mode
+  :ensure t)
+
+(use-package lsp-haskell
+  :ensure t
+  :config
+  (setq lsp-haskell-server-path "ghcide"
+        lsp-haskell-server-args nil))
 
 (use-package flycheck
   :ensure t
@@ -359,6 +381,15 @@
       (insert (term-keys/urxvt-xresources))
       (append-to-file (point-min) (point-max) "~/.Xresources"))))
 
+
+(setq org-duration-format (quote h:mm))
+
+(use-package ox-reveal
+  :ensure t
+  :config
+  (setq org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js"))
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -371,9 +402,19 @@
  '(custom-safe-themes
    '("b89ae2d35d2e18e4286c8be8aaecb41022c1a306070f64a66fd114310ade88aa" "aded61687237d1dff6325edb492bde536f40b048eab7246c61d5c6643c696b7f" default))
  '(package-selected-packages
-   '(term-keys windresize org-roam ob-clojure yasnippet-snippets hl-todo markdown-mode xclip default-text-scale diminish monokai-theme better-defaults cider clojure-mode use-package))
- )
+   '(monokai lsp-haskell lsp-mode ghc-modi ghc-mod ghc hindent haskell-mode ox-reveal org-reveal org-re-reveal term-keys windresize org-roam ob-clojure yasnippet-snippets hl-todo markdown-mode xclip default-text-scale diminish monokai-theme better-defaults cider clojure-mode use-package))
+ '(safe-local-variable-values
+   '((TeX-command-extra-options . "-shell-escape")
+     (cider-cljs-lein-repl . "(do (user/go) (user/cljs-repl))")
+     (cider-ns-refresh-after-fn . "reloaded.repl/resume")
+     (cider-ns-refresh-before-fn . "reloaded.repl/suspend"))))
 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
 ;; Local Variables:
 ;; byte-compile-warnings: (not free-vars unresolved)
 ;; End:
