@@ -34,10 +34,14 @@
 (use-package diminish
   :ensure t)
 
-(use-package monokai-theme
-  :ensure t
-  :config
-  (load-theme 'monokai t))
+(setq custom-theme-directory (concat user-emacs-directory "themes")
+      custom-safe-themes t)
+
+(dolist (path (directory-files custom-theme-directory t "\\w+"))
+  (when (file-directory-p path)
+    (add-to-list 'custom-theme-load-path path)))
+
+(load-theme 'default-black t)
 
 (use-package clojure-mode
   :ensure t
