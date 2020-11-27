@@ -184,3 +184,14 @@ Please run M-x cider or M-x cider-jack-in to connect"))
   (interactive)
   (save-some-buffers)
   (kill-emacs))
+
+(defun lgm/clock-in-when-started ()
+  "Automatically clock in a task when status is changed to STARTED."
+  (when (string= org-state "STARTED")
+    (org-clock-in)))
+
+(defun bk/clock-out-when-waiting ()
+  "Clock out when the task change to WAIT."
+  (when (and (string= org-state "WAIT")
+             (not (string= org-last-state org-state)))
+    (org-clock-out)))
