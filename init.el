@@ -41,7 +41,7 @@
   (when (file-directory-p path)
     (add-to-list 'custom-theme-load-path path)))
 
-(load-theme 'default-black t)
+(load-theme 'manoj-dark t)
 
 (use-package clojure-mode
   :ensure t
