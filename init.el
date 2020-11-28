@@ -140,9 +140,9 @@
   :ensure t
   :diminish paredit-mode
   :config
-  (define-key paredit-mode-map (kbd "M-s") nil)
-  (define-key paredit-mode-map (kbd "M-r") nil)
-  (define-key paredit-mode-map (kbd "M-?") nil)
+  ;; (define-key paredit-mode-map (kbd "M-s") nil)
+  ;; (define-key paredit-mode-map (kbd "M-r") nil)
+  ;; (define-key paredit-mode-map (kbd "M-?") nil)
   (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
   (add-hook 'clojure-mode-hook 'paredit-mode)
   (add-hook 'cider-repl-mode-hook 'paredit-mode))
