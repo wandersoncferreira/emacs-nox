@@ -281,6 +281,9 @@
       uniquify-strip-common-suffix t
       uniquify-ignore-buffers-re "^\\*")
 
+;;; dired
+(setq dired-dwim-target t)
+
 ;;; go back to last marked place
 (global-set-key (kbd "C-x p") 'pop-to-mark-command)
 
