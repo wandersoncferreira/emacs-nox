@@ -390,40 +390,111 @@
       (insert (term-keys/urxvt-xresources))
       (append-to-file (point-min) (point-max) "~/.Xresources"))))
 
+(use-package plantuml-mode
+  :ensure t
+  :after org
+  :init
+  (setq org-plantuml-jar-path "/home/wand/dotfiles/plantuml.jar")
+  :config
+  (require 'ob-plantuml))
 
-(setq org-duration-format (quote h:mm))
+(use-package org
+  :ensure t
+  :init
+  (setq org-duration-format (quote h:mm)
+        org-return-follows-link t
+        org-agenda-files '("/home/wand/agenda")
+        org-clock-out-when-done t
+        org-agenda-log-mode-items '(closed clock state)
+        org-log-done 'time
+        org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "WAIT(w!)" "STARTED(s!)" "|"
+                    "DONE(d)" "CANCELED(c@)" "INACTIVE(i@)" "FAIL(f@)"))
+        org-capture-templates
+        '(("t" "Todo" entry
+           (file+headline "/home/wand/agenda/todo.org" "Task")
+           "* TODO [#D] %^{Title}\n %i %l"
+           :clock-in t :clock-resume t)
+          ("a" "App Sauce" entry
+           (file+headline "/home/wand/all/work-pj/app-sauce.org" "Tasks")
+           "* TODO [#D] %^{Title}\n %i %l"
+           :clock-in t :clock-resume t)))
+  :config
+  (global-set-key (kbd "C-c c") 'org-capture)
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (add-hook 'org-after-todo-state-change-hook 'lgm/clock-in-when-started)
+  (add-hook 'org-after-todo-state-change-hook 'bk/clock-out-when-waiting))
 
 (use-package ox-reveal
   :ensure t
   :config
   (setq org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js"))
 
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-directory "~/zettelkasten")
+  :config
+  (add-hook 'after-init-hook 'org-roam-mode)
+  :bind (:map org-roam-mode-map
+              (("C-c z k" . org-roam)
+               ("C-c z f" . org-roam-find-file)
+               ("C-c z g" . org-roam-graph))
+              :map org-mode-map
+              (("C-c z i" . org-roam-insert)
+               ("C-c z I" . org-roam-insert-immediate))))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(ansi-color-names-vector
-   ["#3c3836" "#fb4934" "#b8bb26" "#fabd2f" "#83a598" "#d3869b" "#8ec07c" "#ebdbb2"])
- '(custom-safe-themes
-   '("b89ae2d35d2e18e4286c8be8aaecb41022c1a306070f64a66fd114310ade88aa" "aded61687237d1dff6325edb492bde536f40b048eab7246c61d5c6643c696b7f" default))
- '(package-selected-packages
-   '(monokai lsp-haskell lsp-mode ghc-modi ghc-mod ghc hindent haskell-mode ox-reveal org-reveal org-re-reveal term-keys windresize org-roam ob-clojure yasnippet-snippets hl-todo markdown-mode xclip default-text-scale diminish monokai-theme better-defaults cider clojure-mode use-package))
- '(safe-local-variable-values
-   '((TeX-command-extra-options . "-shell-escape")
-     (cider-cljs-lein-repl . "(do (user/go) (user/cljs-repl))")
-     (cider-ns-refresh-after-fn . "reloaded.repl/resume")
-     (cider-ns-refresh-before-fn . "reloaded.repl/suspend"))))
+(use-package deft
+  :ensure t
+  :init
+  (setq deft-extensions '("org")
+        deft-directory "~/notes"
+        deft-use-filename-as-title t
+        deft-use-filter-string-for-filename t
+        deft-auto-save-interval 0
+        deft-file-naming-rules '((noslash . "-")
+                                 (nospace . "-")
+                                 (case-fn . downcase)))
+  :config
+  (global-set-key (kbd "C-c t n") 'deft)
+  (global-set-key (kbd "C-c f n") 'deft-find-file))
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;;; finance
+(defun bk/clean-ledger ()
+  "Bring back timeline structure to the whole file."
+  (interactive)
+  (if (eq major-mode 'ledger-mode)
+      (let ((curr-line (line-number-at-pos)))
+        (ledger-mode-clean-buffer)
+        (line-move (- curr-line 1)))))
+
+(use-package ledger-mode
+  :ensure t
+  :mode ("\\ledger$" . ledger-mode)
+  :config
+  (setq ledger-reports
+        '(("food" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^expenses:food")
+          ("apartamento-morumbi" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^expenses:house")
+          ("creta" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^expenses:car:creta ^equity:car:creta")
+          ("netcash" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -R -X R$ --current bal ^assets:bank liabilities:card")
+          ("networth" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^assets:bank liabilities equity:apartment")
+          ("spent-vs-earned" "ledger [[ledger-mode-flags]] -f /home/wand/.ledger bal -X BRL --period=\"last 4 weeks\" ^Expenses ^Income --invert -S amount")
+          ("budget" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^assets:bank:checking:budget liabilities:card")
+          ("taxes" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -R -X R$ --current bal ^expenses:taxes")
+          ("bal" "%(binary) -f %(ledger-file) bal")
+          ("reg" "%(binary) -f %(ledger-file) reg")
+          ("payee" "%(binary) -f %(ledger-file) reg @%(payee)")
+          ("account" "%(binary) -f %(ledger-file) reg %(account)"))))
+
+(use-package flycheck-ledger
+  :ensure t
+  :config
+  (add-hook 'ledger-mode-hook 'flycheck-mode))
+
+;;; registers
+(set-register ?t '(file . "~/agenda/todo.org"))
+(set-register ?l '(file . "~/ledger"))
+
 ;; Local Variables:
 ;; byte-compile-warnings: (not free-vars unresolved)
 ;; End:
