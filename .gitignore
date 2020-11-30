@@ -8,3 +8,5 @@ transient/
 .mc-lists.el
 tramp
 bookmarks
+*.sqlite
+*.db
