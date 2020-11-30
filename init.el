@@ -498,6 +498,11 @@
   :config
   (add-hook 'ledger-mode-hook 'flycheck-mode))
 
+(use-package docker
+  :ensure t
+  :config
+  (global-set-key (kbd "C-c d") 'docker))
+
 ;;; registers
 (set-register ?t '(file . "~/agenda/todo.org"))
 (set-register ?l '(file . "~/ledger"))
