@@ -409,6 +409,7 @@
         org-agenda-files '("/home/wand/agenda")
         org-clock-out-when-done t
         org-agenda-log-mode-items '(closed clock state)
+        org-agenda-window-setup 'only-window
         org-log-done 'time
         org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "WAIT(w!)" "STARTED(s!)" "|"
