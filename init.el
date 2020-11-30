@@ -448,6 +448,9 @@
               (("C-c z i" . org-roam-insert)
                ("C-c z I" . org-roam-insert-immediate))))
 
+(use-package org-roam-server
+  :ensure t)
+
 (use-package deft
   :ensure t
   :init
