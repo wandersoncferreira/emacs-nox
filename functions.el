@@ -195,3 +195,19 @@ Please run M-x cider or M-x cider-jack-in to connect"))
   (when (and (string= org-state "WAIT")
              (not (string= org-last-state org-state)))
     (org-clock-out)))
+
+(defun bk/jump-to-register ()
+  "Switch between current position and pos stored."
+  (interactive)
+  (let ((tmp (point-marker)))
+    (jump-to-register 8)
+    (set-register 8 tmp)))
+
+(defun bk/point-to-register ()
+  "Store cursor position in a register."
+  (interactive)
+  (point-to-register 8)
+  (message "Point set"))
+
+(global-set-key (kbd "C-c r p") 'bk/point-to-register)
+(global-set-key (kbd "C-c r j") 'bk/jump-to-register)

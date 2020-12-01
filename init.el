@@ -346,6 +346,13 @@
   (define-key yas-minor-mode-map (kbd "TAB") nil)
   (define-key yas-minor-mode-map (kbd "C-c y") #'yas-expand))
 
+
+(use-package disable-mouse
+  :ensure t
+  :diminish disable-mouse-mode
+  :config
+  (disable-mouse-mode +1))
+
 (use-package yasnippet-snippets
   :ensure t)
 
@@ -420,7 +427,7 @@
            "* TODO [#D] %^{Title}\n %i %l"
            :clock-in t :clock-resume t)
           ("a" "App Sauce" entry
-           (file+headline "/home/wand/all/work-pj/app-sauce.org" "Tasks")
+           (file+headline "/home/wand/work-pj/app-sauce.org" "Tasks")
            "* TODO [#D] %^{Title}\n %i %l"
            :clock-in t :clock-resume t)))
   :config
@@ -436,6 +443,7 @@
 
 (use-package org-roam
   :ensure t
+  :diminish org-roam-mode
   :init
   (setq org-roam-directory "~/zettelkasten")
   :config
@@ -503,11 +511,68 @@
   :config
   (global-set-key (kbd "C-c d") 'docker))
 
+;;; setup to help me create the invoice
+(defun endless/filter-timestamp (trans back _comm)
+  "Remove <> around time-stamps."
+  (pcase back
+    ((or `jekyll `html)
+     (replace-regexp-in-string "&[lg]t;" "" trans))
+    (`latex
+     (replace-regexp-in-string "[<>]" "" trans))))
+
+(add-to-list 'org-export-filter-timestamp-functions #'endless/filter-timestamp)
+
+(setq-default org-display-custom-times t)
+
+;;; Before you ask: No, removing the <> here doesn't work.
+(setq org-time-stamp-custom-formats
+      '("<%d %b %Y>" . "<%d/%m %H:%M>"))
+
+(setq org-export-with-sub-superscripts nil)
+
+(require 'dired-x)
+(setq dired-omit-mode t)
+
+(defun dired-dotfiles-toggle ()
+  "Show/hide dot-files."
+  (interactive)
+  (when (equal major-mode 'dired-mode)
+    (if (or (not (boundp 'dired-dotfiles-show-p)) dired-dotfiles-show-p) ; if currently showing
+        (progn
+          (set (make-local-variable 'dired-dotfiles-show-p) nil)
+          (message "h")
+          (dired-mark-files-regexp "^\\\.")
+          (dired-do-kill-lines))
+      (progn (revert-buffer) ; otherwise just revert to re-show
+             (set (make-local-variable 'dired-dotfiles-show-p) t)))))
+
+(add-hook 'dired-mode-hook 'dired-dotfiles-toggle)
+
+
 ;;; registers
 (set-register ?t '(file . "~/agenda/todo.org"))
 (set-register ?l '(file . "~/ledger"))
 
-;; Local Variables:
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(ansi-color-names-vector
+   ["black" "red3" "ForestGreen" "yellow3" "blue" "magenta3" "DeepSkyBlue" "gray50"])
+ '(package-selected-packages
+   (quote
+    (disable-mouse disable-mouse-mode org-roam-server forge org-download docker flycheck-ledger ledger-mode deft org-roam ox-reveal plantuml-mode term-keys yasnippet-snippets hl-todo xclip windresize whitespace-cleanup-mode command-log-mode avy jump-char projectile fix-word change-inner expand-region smex counsel exec-path-from-shell ivy git-timemachine magit company flycheck-clj-kondo flycheck lsp-haskell lsp-mode haskell-mode clj-refactor cider clojure-mode diminish use-package)))
+ '(safe-local-variable-values (quote ((TeX-command-extra-options . "-shell-escape")))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+ ;; Local Variables:
 ;; byte-compile-warnings: (not free-vars unresolved)
 ;; End:
 ;;; init.el ends here
