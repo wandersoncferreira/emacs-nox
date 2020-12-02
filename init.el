@@ -6,8 +6,16 @@
 
 ;;; Code:
 
+;;; load functions
+(load-file (expand-file-name "functions.el" user-emacs-directory))
+
 ;;; disable cosmetics
 (menu-bar-mode -1)
+
+(if (display-graphic-p)
+    (progn
+      (tool-bar-mode -1)
+      (scroll-bar-mode -1)))
 
 (setq inhibit-startup-screen t
       inhibit-startup-message t)
@@ -42,9 +50,12 @@
     (add-to-list 'custom-theme-load-path path)))
 
 (load-theme 'manoj-dark t)
+(bk/set-consolas-font)
 
 (use-package clojure-mode
   :ensure t
+  :init
+  (setq nrepl-use-ssh-fallback-for-remote-hosts t)
   :config
   (defalias 'cquit 'cider-quit)
   (define-key clojure-mode-map (kbd "C-c M-j") #'cider-jack-in)
@@ -309,11 +320,10 @@
     (dotimes (i 10)
       (when (= p (point)) ad-do-it))))
 
-;;; load functions
-(load-file (expand-file-name "functions.el" user-emacs-directory))
+
 
 ;;; load tmux translations
-(load-file (expand-file-name "tmux-translation.el" user-emacs-directory))
+;; (load-file (expand-file-name "tmux-translation.el" user-emacs-directory))
 
 ;;; amazing hack using urxvt
 (if (string-equal (system-name) "tomato")
@@ -323,13 +333,15 @@
 
 ;;; fix kill rings
 (setq save-interprogram-paste-before-kill t
-      x-select-enable-clipboard t
-      select-enable-clipboard t)
+      x-select-enable-clipboard-manager nil
+      ;; x-select-enable-clipboard t
+      ;; select-enable-clipboard t
+      )
 
-(use-package xclip
-  :ensure t
-  :config
-  (xclip-mode +1))
+;; (use-package xclip
+;;   :ensure t
+;;   :config
+;;   (xclip-mode +1))
 
 ;;; programming mode
 (use-package hl-todo
@@ -389,22 +401,22 @@
 (global-set-key (kbd "S-<left>") 'bk/windmove-left)
 (global-set-key (kbd "S-<right>") 'bk/windmove-right)
 
-(use-package term-keys
-  :ensure t
-  :config
-  (term-keys-mode t)
-  (defun bk/setup-Xresources ()
-    (interactive)
-    (require 'term-keys-urxvt)
-    (with-temp-buffer
-      (insert (term-keys/urxvt-xresources))
-      (append-to-file (point-min) (point-max) "~/.Xresources"))))
+;; (use-package term-keys
+;;   :ensure t
+;;   :config
+;;   (term-keys-mode t)
+;;   (defun bk/setup-Xresources ()
+;;     (interactive)
+;;     (require 'term-keys-urxvt)
+;;     (with-temp-buffer
+;;       (insert (term-keys/urxvt-xresources))
+;;       (append-to-file (point-min) (point-max) "~/.Xresources"))))
 
 (use-package plantuml-mode
   :ensure t
   :after org
   :init
-  (setq org-plantuml-jar-path "/home/wand/dotfiles/plantuml.jar")
+  (setq org-plantuml-jar-path "/home/bartuka/documents/dotfiles/plantuml.jar")
   :config
   (require 'ob-plantuml))
 
@@ -413,7 +425,7 @@
   :init
   (setq org-duration-format (quote h:mm)
         org-return-follows-link t
-        org-agenda-files '("/home/wand/agenda")
+        org-agenda-files '("/home/bartuka/documents/agenda")
         org-clock-out-when-done t
         org-agenda-log-mode-items '(closed clock state)
         org-agenda-window-setup 'only-window
@@ -423,11 +435,11 @@
                     "DONE(d)" "CANCELED(c@)" "INACTIVE(i@)" "FAIL(f@)"))
         org-capture-templates
         '(("t" "Todo" entry
-           (file+headline "/home/wand/agenda/todo.org" "Task")
+           (file+headline "/home/bartuka/documents/agenda/todo.org" "Task")
            "* TODO [#D] %^{Title}\n %i %l"
            :clock-in t :clock-resume t)
           ("a" "App Sauce" entry
-           (file+headline "/home/wand/work-pj/app-sauce.org" "Tasks")
+           (file+headline "/home/bartuka/documents/work-pj/app-sauce.org" "Tasks")
            "* TODO [#D] %^{Title}\n %i %l"
            :clock-in t :clock-resume t)))
   :config
@@ -445,7 +457,7 @@
   :ensure t
   :diminish org-roam-mode
   :init
-  (setq org-roam-directory "~/zettelkasten")
+  (setq org-roam-directory "~/documents/zettelkasten")
   :config
   (add-hook 'after-init-hook 'org-roam-mode)
   :bind (:map org-roam-mode-map
@@ -463,7 +475,7 @@
   :ensure t
   :init
   (setq deft-extensions '("org")
-        deft-directory "~/notes"
+        deft-directory "~/documents/notes"
         deft-use-filename-as-title t
         deft-use-filter-string-for-filename t
         deft-auto-save-interval 0
@@ -488,14 +500,14 @@
   :mode ("\\ledger$" . ledger-mode)
   :config
   (setq ledger-reports
-        '(("food" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^expenses:food")
-          ("apartamento-morumbi" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^expenses:house")
-          ("creta" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^expenses:car:creta ^equity:car:creta")
-          ("netcash" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -R -X R$ --current bal ^assets:bank liabilities:card")
-          ("networth" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^assets:bank liabilities equity:apartment")
-          ("spent-vs-earned" "ledger [[ledger-mode-flags]] -f /home/wand/.ledger bal -X BRL --period=\"last 4 weeks\" ^Expenses ^Income --invert -S amount")
-          ("budget" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -X R$ --current bal ^assets:bank:checking:budget liabilities:card")
-          ("taxes" "ledger [[ledger-mode-flags]] -f /home/wand/ledger -R -X R$ --current bal ^expenses:taxes")
+        '(("food" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger -X R$ --current bal ^expenses:food")
+          ("apartamento-morumbi" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger -X R$ --current bal ^expenses:house")
+          ("creta" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger -X R$ --current bal ^expenses:car:creta ^equity:car:creta")
+          ("netcash" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger -R -X R$ --current bal ^assets:bank liabilities:card")
+          ("networth" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger -X R$ --current bal ^assets:bank liabilities equity:apartment")
+          ("spent-vs-earned" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger bal -X BRL --period=\"last 4 weeks\" ^Expenses ^Income --invert -S amount")
+          ("budget" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger -X R$ --current bal ^assets:bank:checking:budget liabilities:card")
+          ("taxes" "ledger [[ledger-mode-flags]] -f /home/bartuka/documents/ledger -R -X R$ --current bal ^expenses:taxes")
           ("bal" "%(binary) -f %(ledger-file) bal")
           ("reg" "%(binary) -f %(ledger-file) reg")
           ("payee" "%(binary) -f %(ledger-file) reg @%(payee)")
@@ -548,10 +560,9 @@
 
 (add-hook 'dired-mode-hook 'dired-dotfiles-toggle)
 
-
 ;;; registers
-(set-register ?t '(file . "~/agenda/todo.org"))
-(set-register ?l '(file . "~/ledger"))
+(set-register ?t '(file . "~/documents/agenda/todo.org"))
+(set-register ?l '(file . "~/documents/ledger"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -562,6 +573,9 @@
    [default default default italic underline success warning error])
  '(ansi-color-names-vector
    ["black" "red3" "ForestGreen" "yellow3" "blue" "magenta3" "DeepSkyBlue" "gray50"])
+ '(org-modules
+   (quote
+    (ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit org-id ol-info ol-irc ol-mhe org-mouse ol-rmail org-tempo ol-w3m)))
  '(package-selected-packages
    (quote
     (disable-mouse disable-mouse-mode org-roam-server forge org-download docker flycheck-ledger ledger-mode deft org-roam ox-reveal plantuml-mode term-keys yasnippet-snippets hl-todo xclip windresize whitespace-cleanup-mode command-log-mode avy jump-char projectile fix-word change-inner expand-region smex counsel exec-path-from-shell ivy git-timemachine magit company flycheck-clj-kondo flycheck lsp-haskell lsp-mode haskell-mode clj-refactor cider clojure-mode diminish use-package)))

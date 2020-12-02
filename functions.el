@@ -1,3 +1,9 @@
+(defun bk/set-consolas-font ()
+  "Define the Consolas font."
+  (when (member "Consolas" (font-family-list))
+    (set-face-attribute 'default nil :font "Consolas" :height 130)))
+
+
 (defun bk/occur-dwim ()
   "Call `occur' with a sane default."
   (interactive)
@@ -114,6 +120,13 @@
   (interactive)
   (message "Oops! You're not connected to an nREPL server.
 Please run M-x cider or M-x cider-jack-in to connect"))
+
+(defun bk/sudo-edit (&optional arg)
+  "Function to edit file with super-user with optional ARG."
+  (interactive "P")
+  (if (or arg (not buffer-file-name))
+      (find-file (concat "/sudo:root@localhost:" (read-file-name "File: ")))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
 
 
 (defun bk/kill-buffer ()
